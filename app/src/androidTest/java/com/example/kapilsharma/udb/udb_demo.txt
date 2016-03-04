@@ -1,0 +1,92 @@
+@SuppressLint("NewApi")
+public class Server extends Activity {
+
+    private static final int UDP_SERVER_PORT = 2004;
+    private static final int MAX_UDP_DATAGRAM_LEN = 1500;
+    private TextView textMessage;
+    private RunServerInThread runServer = null;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_server);
+
+        if (android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+          }
+
+        textMessage = (TextView) findViewById(R.id.messageText);
+        runServer = new RunServerInThread();
+        runServer.start();
+    }
+    private Runnable updateTextMessage = new Runnable() {
+        public void run() {
+            if (runServer == null) return;
+            textMessage.setText(runServer.getLastMessage());
+        }
+    };
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.server, menu);
+        return true;
+    }
+
+
+    private void runUdpServer() {
+        String message;
+        byte[] lmessage = new byte[MAX_UDP_DATAGRAM_LEN];
+        DatagramPacket packet = new DatagramPacket(lmessage, lmessage.length);
+        DatagramSocket socket = null;
+        try {
+            socket = new DatagramSocket(UDP_SERVER_PORT);
+            socket.receive(packet);
+            message = new String(lmessage, 0, packet.getLength());
+            textMessage.setText(message);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (socket != null) {
+                socket.close();
+            }
+        }
+
+    }
+
+    private class RunServerInThread extends Thread{
+        private boolean keepRunning = true;
+        private String lastmessage = "";
+
+        @Override
+        public void run() {
+            String message;
+            byte[] lmessage = new byte[MAX_UDP_DATAGRAM_LEN];
+            DatagramPacket packet = new DatagramPacket(lmessage, lmessage.length);
+            DatagramSocket socket = null;
+            while(keepRunning){
+            try {
+                socket = new DatagramSocket(UDP_SERVER_PORT);
+                socket.receive(packet);
+                message = new String(lmessage, 0, packet.getLength());
+                textMessage.setText(message);
+            } catch (SocketException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (socket != null) {
+                    socket.close();
+                }
+            }
+        }
+        }
+
+       public String getLastMessage() {
+            return lastmessage;
+        }
+    }
+}
