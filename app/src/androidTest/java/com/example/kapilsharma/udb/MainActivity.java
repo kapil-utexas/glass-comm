@@ -1,8 +1,9 @@
-package com.example.kapilsharma.udb;
+
 
 /**
  * Created by kapilsharma on 3/3/16.
  */
+package com.example.kapilsharma.udb;
         import android.net.ConnectivityManager;
         import android.net.NetworkInfo;
         import android.os.Bundle;
@@ -28,7 +29,7 @@ public class MainActivity extends Activity {
 
         // Get last saved IP and port:
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        String ipPref = settings.getString("udpIpAddress", "10.0.1.5");
+        String ipPref = settings.getString("udpIpAddress", "10.145.174.92");
         String portPref = settings.getString("udpPort", "4444");
 
         // Set the text fields with the last IP and port
